@@ -37,8 +37,8 @@ $master_ip=$Args[1]
 $peinstaller_url_windows=$Args[2]
 add-content "C:\\Windows\\System32\\drivers\\etc\\hosts" "$master_ip $master_fqdn"
 wget $peinstaller_url_windows -outfile "c:\\windows\\temp\\puppet-enterprise-installer.msi"
-msiexec /i "C:\\Windows\\Temp\\puppet-enterprise-installer.msi" /quiet
-$env:Path += ";C:\\Program Files\\Puppet Labs\\Puppet\\bin"
+Start-Process -FilePath msiexec -ArgumentList /i, "C:\\Windows\\Temp\\puppet-enterprise-installer.msi", /quiet -wait 
+$env:Path += ";C:\\Program Files\\Puppet Labs\\Puppet Enterprise\\bin"
 puppet config set server $master_fqdn
 puppet agent -t
 SCRIPT
