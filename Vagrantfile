@@ -34,7 +34,7 @@ SCRIPT
 $install_puppet_node_windows = <<SCRIPT
 $master_fqdn="$1"
 $master_ip="$2"
-peinstaller_url_windows="$3"
+$peinstaller_url_windows="$3"
 add-content "C:\Windows\System32\drivers\etc\hosts" "$master_ip $master_fqdn"
 wget $peinstaller_url_windows -outfile "c:\windows\temp\puppet-enterprise-installer.msi"
 msiexec /i "c:\windows\temp\puppet-enterprise-installer.msi" /quiet
