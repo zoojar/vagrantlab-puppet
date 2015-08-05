@@ -1,1 +1,3 @@
-Vagrant setup for puppet lab.
+h1. Vagrant setup for puppet lab
+
+Given a set of nodes, a pe installer url and answer file url; this is a basic setup for a puppet nodes & master lab.
