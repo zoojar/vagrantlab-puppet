@@ -1,22 +1,23 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-$reposerver      = "192.168.0.25"
 $domain          = "lab.local"
 $master_hostname = "puppet"
 $master_ip       = "192.168.100.100"
-$peinstaller     = "puppet-enterprise-3.8.1-ubuntu-14.04-amd64"
-$peanswers       = "master.puppetlabs.vm.answers"
+$peinstaller_url = "http://192.168.0.25/puppet-enterprise-3.8.1-ubuntu-14.04-amd64.tar.gz"
+#$peinstaller_url = "https://pm.puppetlabs.com/puppet-enterprise/3.8.1/puppet-enterprise-3.8.1-ubuntu-14.04-amd64.tar.gz"
+$peanswers_url   = "http://192.168.0.25/puppet.master.answers"
+#$peanswers_url   = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/puppet.master.answers"
 
 $install_puppet_master = <<SCRIPT
-reposerver="$1"
-peinstaller="$2"
-peanswers="$3"
+peinstaller_url="$1"
+peanswers_url="$2"
 apt-get install axel -y
-axel -q http://$reposerver/$peinstaller.tar -o /tmp/$peinstaller.tar
-axel -q http://$reposerver/$peanswers -o /tmp/$peanswers 
-tar -xf /tmp/$peinstaller.tar -C /tmp
-sudo /tmp/$peinstaller/puppet-enterprise-installer -a /tmp/$peanswers 
+axel -q $peinstaller_url -o /tmp/peinstaller.tar.gz
+mkdir /tmp/peinstaller
+tar -xf /tmp/peinstaller.tar.gz --strip-components=1 -C /tmp/peinstaller
+curl -L $peanswers_url > /tmp/master.answers
+sudo /tmp/peinstaller/puppet-enterprise-installer -a /tmp/master.answers 
 SCRIPT
 
 $install_puppet_node = <<SCRIPT
@@ -27,7 +28,6 @@ curl -k https://$master_fqdn:8140/packages/current/install.bash | sudo bash
 puppet agent -t
 SCRIPT
 
-
 nodes = [
   { 
     :hostname        => $master_hostname, 
@@ -37,7 +37,7 @@ nodes = [
     :cpus            => 4,
     :cpuexecutioncap => 90,
     :shell_script    => $install_puppet_master, 
-    :shell_args      => [$reposerver, $peinstaller, $peanswers]  
+    :shell_args      => [$peinstaller_url, $peanswers_url]  
   },
   { 
     :hostname        => "linuxnode-01", 
