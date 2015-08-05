@@ -1,13 +1,15 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-$domain          = "lab.local"
-$master_hostname = "puppet"
-$master_ip       = "192.168.100.100"
-$peinstaller_url = "http://192.168.0.25/puppet-enterprise-3.8.1-ubuntu-14.04-amd64.tar.gz"
-#$peinstaller_url = "https://pm.puppetlabs.com/puppet-enterprise/3.8.1/puppet-enterprise-3.8.1-ubuntu-14.04-amd64.tar.gz"
-$peanswers_url   = "http://192.168.0.25/puppet.master.answers"
-#$peanswers_url   = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/puppet.master.answers"
+$domain                  = "lab.local"
+$master_hostname         = "puppet"
+$master_ip               = "192.168.100.100"
+$peinstaller_url         = "http://192.168.0.25/puppet-enterprise-3.8.1-ubuntu-14.04-amd64.tar.gz"
+#$peinstaller_url        = "https://pm.puppetlabs.com/puppet-enterprise/3.8.1/puppet-enterprise-3.8.1-ubuntu-14.04-amd64.tar.gz"
+$peanswers_url           = "http://192.168.0.25/puppet.master.answers"
+#$peanswers_url          = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/puppet.master.answers"
+$peinstaller_url_windows = "http://192.168.0.25/puppet-enterprise-3.8.0-x64.msi"
+#$peinstaller_url_windows = "http://pm.puppetlabs.com/puppet-enterprise/3.8.0/puppet-enterprise-3.8.0-x64.msi"
 
 $install_puppet_master = <<SCRIPT
 peinstaller_url="$1"
@@ -28,9 +30,20 @@ curl -k https://$master_fqdn:8140/packages/current/install.bash | sudo bash
 puppet agent -t
 SCRIPT
 
+$install_puppet_node_windows = <<SCRIPT
+master_fqdn="$1"
+master_ip="$2"
+peinstaller_url_windows="$3"
+add-content "C:\Windows\System32\drivers\etc\hosts" "$master_ip $master_fqdn"
+wget $peinstaller_url_windows -outfile "c:\windows\temp\puppet-enterprise-installer.msi"
+msiexec /i "c:\windows\temp\puppet-enterprise-installer.msi" /quiet
+puppet agent -t
+SCRIPT
+
 nodes = [
   { 
     :hostname        => $master_hostname, 
+    :domain          => $domain,
     :ip              => $master_ip, 
     :box             => 'ubuntu/trusty64', 
     :ram             => 6000,
@@ -40,18 +53,27 @@ nodes = [
     :shell_args      => [$peinstaller_url, $peanswers_url]  
   },
   { 
-    :hostname        => "linuxnode-01", 
-    :ip              => '192.168.100.10', :box => 'ubuntu/trusty64',
+    :hostname        => "linuxnode-01",
+    :domain          => $domain,
+    :ip              => '192.168.100.10', 
+    :box             => 'ubuntu/trusty64',
     :shell_script    => $install_puppet_node, 
     :shell_args      => ["#{$master_hostname}.#{$domain}", $master_ip] 
+  },
+  { 
+    :hostname        => "windowsnode-01",
+    :ip              => '192.168.100.11',
+    :box             => 'opentable/win-2012r2-standard-amd64-nocm',
+    :shell_script    => $install_puppet_node_windows, 
+    :shell_args      => ["#{$master_hostname}.#{$domain}", $master_ip, $peinstaller_url_windows] 
   },
 ]
 
 Vagrant.configure("2") do |config|
   nodes.each do |node|
     config.vm.define node[:hostname] do |nodeconfig|
-      nodeconfig.vm.box      = 'ubuntu/trusty64'
-      nodeconfig.vm.hostname = "#{node[:hostname]}.#{$domain}"
+      nodeconfig.vm.box      = node[:box]
+      nodeconfig.vm.hostname = node[:domain] ? "#{node[:hostname]}.#{node[:domain]}" : "#{node[:hostname]}" ;
       memory                 = node[:ram] ? node[:ram] : 2000 ; 
       cpus                   = node[:cpus] ? node[:cpus] : 2 ;
       cpuexecutioncap        = node[:cpuexecutioncap] ? node[:cpuexecutioncap] : 50 ;
