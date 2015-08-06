@@ -1,0 +1,67 @@
+$install_puppet_master = <<SCRIPT
+peinstaller_url="$1"
+peanswers_url="$2"
+initr10k_url="$3"
+
+echo "Downloading puppet from $peinstaller_url and extracting to /tmp/peinstaller..." 
+apt-get install axel -y
+axel -q $peinstaller_url -o /tmp/peinstaller.tar.gz
+mkdir /tmp/peinstaller
+tar -xf /tmp/peinstaller.tar.gz --strip-components=1 -C /tmp/peinstaller
+
+echo "Downloading answers file from $peanswers_url..."
+curl -L $peanswers_url > /tmp/master.answers
+
+echo "Installing puppet..."
+sudo /tmp/peinstaller/puppet-enterprise-installer -a /tmp/master.answers
+
+echo "Installing puppet module: zack/r10k..."
+sudo puppet module install zack/r10k
+
+echo "Setting up r10k with puppet from $initr10k_url: $(curl -sL $initr10k_url)"
+curl -L $initr10k_url > /tmp/initr10k.pp
+sudo puppet apply /tmp/initr10k.pp
+sudo r10k deploy environment -pv
+
+SCRIPT
+
+$install_puppet_node = <<SCRIPT
+master_fqdn="$1"
+master_ip="$2"
+
+echo "Adding [$master_ip $master_fqdn] to hosts file..."
+sudo echo "$master_ip $master_fqdn" >> /etc/hosts
+
+echo "Installing puppet from https://$master_fqdn:8140/packages/current/install.bash..."
+curl -k https://$master_fqdn:8140/packages/current/install.bash | sudo bash
+
+echo "Configuring puppet with master server $master_fqdn..."
+sudo puppet config set server $master_fqdn
+
+echo "Calling home..."
+sudo sh -c "puppet agent -t ; true" # supress non-zero exit code
+
+SCRIPT
+
+$install_puppet_node_windows = <<SCRIPT
+$master_fqdn=$Args[0]
+$master_ip=$Args[1]
+$peinstaller_url_windows=$Args[2]
+
+echo "Adding [$master_ip $master_fqdn] to hosts file..."
+add-content "C:\\Windows\\System32\\drivers\\etc\\hosts" "$master_ip $master_fqdn"
+
+echo "Downloading puppet from $peinstaller_url_windows..."
+wget $peinstaller_url_windows -outfile "c:\\windows\\temp\\puppet-enterprise-installer.msi"
+
+echo "Installing puppet..."
+Start-Process -FilePath msiexec -ArgumentList /i, "C:\\Windows\\Temp\\puppet-enterprise-installer.msi", /quiet -wait 
+
+echo "Configuring puppet with master server $master_fqdn..."
+$env:Path += ";C:\\Program Files\\Puppet Labs\\Puppet Enterprise\\bin"
+puppet config set server $master_fqdn
+
+echo "Calling home..."
+start-process puppet.bat "agent -t" 
+
+SCRIPT
