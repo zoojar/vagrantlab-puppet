@@ -4,22 +4,27 @@
 $domain                  = "lab.local"
 $master_hostname         = "puppet"
 $master_ip               = "192.168.100.100"
-$peinstaller_url         = "http://192.168.0.25/puppet-enterprise-3.8.1-ubuntu-14.04-amd64.tar.gz"
+$peinstaller_url         = "http://192.168.43.181/puppet-enterprise-3.8.1-ubuntu-14.04-amd64.tar.gz"
 #$peinstaller_url        = "https://pm.puppetlabs.com/puppet-enterprise/3.8.1/puppet-enterprise-3.8.1-ubuntu-14.04-amd64.tar.gz"
-$peanswers_url           = "http://192.168.0.25/puppet.master.answers"
+$peanswers_url           = "http://192.168.43.181/puppet.master.answers"
 #$peanswers_url          = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/puppet.master.answers"
-$peinstaller_url_windows = "http://192.168.0.25/puppet-enterprise-3.8.0-x64.msi"
+$peinstaller_url_windows = "http://192.168.43.181/puppet-enterprise-3.8.0-x64.msi"
 #$peinstaller_url_windows = "http://pm.puppetlabs.com/puppet-enterprise/3.8.0/puppet-enterprise-3.8.0-x64.msi"
+$initr10k_url            = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/initr10k.pp"
 
 $install_puppet_master = <<SCRIPT
 peinstaller_url="$1"
 peanswers_url="$2"
+initr10k_url="$3"
 apt-get install axel -y
 axel -q $peinstaller_url -o /tmp/peinstaller.tar.gz
 mkdir /tmp/peinstaller
 tar -xf /tmp/peinstaller.tar.gz --strip-components=1 -C /tmp/peinstaller
 curl -L $peanswers_url > /tmp/master.answers
-sudo /tmp/peinstaller/puppet-enterprise-installer -a /tmp/master.answers 
+sudo /tmp/peinstaller/puppet-enterprise-installer -a /tmp/master.answers
+sudo puppet module install zack/r10k
+curl -L $initr10k_url > /tmp/initr10k.pp
+sudo puppet apply /tmp/initr10k.pp
 SCRIPT
 
 $install_puppet_node = <<SCRIPT
@@ -27,8 +32,8 @@ master_fqdn="$1"
 master_ip="$2"
 sudo echo "$master_ip $master_fqdn" >> /etc/hosts
 curl -k https://$master_fqdn:8140/packages/current/install.bash | sudo bash
-puppet config set server $master_fqdn
-puppet agent -t
+sudo puppet config set server $master_fqdn
+sudo sh -c "puppet agent -t ; true" # supress non-zero exit code
 SCRIPT
 
 $install_puppet_node_windows = <<SCRIPT
@@ -40,7 +45,7 @@ wget $peinstaller_url_windows -outfile "c:\\windows\\temp\\puppet-enterprise-ins
 Start-Process -FilePath msiexec -ArgumentList /i, "C:\\Windows\\Temp\\puppet-enterprise-installer.msi", /quiet -wait 
 $env:Path += ";C:\\Program Files\\Puppet Labs\\Puppet Enterprise\\bin"
 puppet config set server $master_fqdn
-puppet agent -t
+start-process puppet.bat "agent -t" 
 SCRIPT
 
 nodes = [
@@ -53,7 +58,7 @@ nodes = [
     :cpus            => 4,
     :cpuexecutioncap => 90,
     :shell_script    => $install_puppet_master, 
-    :shell_args      => [$peinstaller_url, $peanswers_url]  
+    :shell_args      => [$peinstaller_url, $peanswers_url, $initr10k_url]  
   },
   { 
     :hostname        => "linuxnode-01",
