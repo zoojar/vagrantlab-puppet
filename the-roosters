@@ -1,7 +1,7 @@
 $install_puppet_master = <<SCRIPT
 peinstaller_url="$1"
 peanswers_url="$2"
-initr10k_url="$3"
+r10kyaml_url="$3"
 
 echo "Downloading puppet from $peinstaller_url and extracting to /tmp/peinstaller..." 
 apt-get install axel -y
@@ -15,12 +15,8 @@ curl -L $peanswers_url > /tmp/master.answers
 echo "Installing puppet..."
 sudo /tmp/peinstaller/puppet-enterprise-installer -a /tmp/master.answers
 
-echo "Installing puppet module: zack/r10k..."
-sudo puppet module install zack/r10k
-
-echo "Setting up r10k with puppet from $initr10k_url: $(curl -sL $initr10k_url)"
-curl -L $initr10k_url > /tmp/initr10k.pp
-sudo puppet apply /tmp/initr10k.pp
+echo "Configuring r10k with puppet from $r10kyaml_url: $(curl -sL $r10kyaml_url)"
+curl -L $r10kyaml_url > /etc/puppetlabs/r10k/r10k.yaml
 sudo r10k deploy environment -pv
 
 SCRIPT
