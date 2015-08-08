@@ -1,11 +1,19 @@
-$install_puppet_master = <<SCRIPT
+$install_puppet_master_centos7 = <<SCRIPT
 peinstaller_url="$1"
 peanswers_url="$2"
 r10kyaml_url="$3"
+master_fqdn="$4"
+master_ip="$5"
+
+echo "Adding [$master_ip $master_fqdn] to hosts file..."
+sudo echo -e "$master_ip $master_fqdn\n$(cat /etc/hosts)" > /etc/hosts
+
+echo "Disabling firewall"
+sudo systemctl mask firewalld ; sudo systemctl stop firewalld
 
 echo "Downloading puppet from $peinstaller_url and extracting to /tmp/peinstaller..." 
-apt-get install axel -y
-axel -q $peinstaller_url -o /tmp/peinstaller.tar.gz
+#apt-get install axel -y
+wget -q $peinstaller_url -O /tmp/peinstaller.tar.gz
 mkdir /tmp/peinstaller
 tar -xf /tmp/peinstaller.tar.gz --strip-components=1 -C /tmp/peinstaller
 
@@ -21,12 +29,13 @@ sudo r10k deploy environment -pv
 
 SCRIPT
 
-$install_puppet_node = <<SCRIPT
+
+$install_puppet_agent_linux = <<SCRIPT
 master_fqdn="$1"
 master_ip="$2"
 
 echo "Adding [$master_ip $master_fqdn] to hosts file..."
-sudo echo "$master_ip $master_fqdn" >> /etc/hosts
+sudo echo -e "$master_ip $master_fqdn\n$(cat /etc/hosts)" > /etc/hosts
 
 echo "Installing puppet from https://$master_fqdn:8140/packages/current/install.bash..."
 curl -k https://$master_fqdn:8140/packages/current/install.bash | sudo bash
@@ -39,7 +48,8 @@ sudo sh -c "puppet agent -t ; true" # supress non-zero exit code
 
 SCRIPT
 
-$install_puppet_node_windows = <<SCRIPT
+
+$install_puppet_agent_windows = <<SCRIPT
 $master_fqdn=$Args[0]
 $master_ip=$Args[1]
 $peinstaller_url_windows=$Args[2]

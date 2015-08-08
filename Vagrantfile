@@ -4,8 +4,8 @@
 $domain                  = "lab.local"
 $master_hostname         = "puppet"
 $master_ip               = "192.168.100.100"
-$localwebserver          = "192.168.43.181"
-$peinstaller_url         = "http://#{$localwebserver}/puppet-enterprise-2015.2.0-ubuntu-14.04-amd64.tar.gz"
+$localwebserver          = "192.168.0.25"
+$peinstaller_url         = "http://#{$localwebserver}/puppet-enterprise-2015.2.0-el-7-x86_64.tar.gz"
 #$peinstaller_url        = "https://pm.puppetlabs.com/puppet-enterprise/3.8.1/puppet-enterprise-3.8.1-ubuntu-14.04-amd64.tar.gz"
 $peanswers_url           = "http://#{$localwebserver}/puppet.lab.local.answers"
 #$peanswers_url          = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/puppet.master.answers"
@@ -21,26 +21,26 @@ nodes = [
     :hostname        => $master_hostname, 
     :domain          => $domain,
     :ip              => $master_ip, 
-    :box             => 'puppetlabs/ubuntu-14.04-64-nocm', 
+    :box             => 'puppetlabs/centos-7.0-64-nocm', 
     :ram             => 8000,
     :cpus            => 4,
     :cpuexecutioncap => 90,
-    :shell_script    => $install_puppet_master, 
-    :shell_args      => [$peinstaller_url, $peanswers_url, $r10kyaml_url]  
+    :shell_script    => $install_puppet_master_centos7, 
+    :shell_args      => [$peinstaller_url, $peanswers_url, $r10kyaml_url, "#{$master_hostname}.#{$domain}", $master_ip]  
   },
   { 
     :hostname        => "linuxnode-01",
     :domain          => $domain,
     :ip              => '192.168.100.10', 
     :box             => 'puppetlabs/ubuntu-14.04-64-nocm',
-    :shell_script    => $install_puppet_node, 
+    :shell_script    => $install_puppet_agent_linux, 
     :shell_args      => ["#{$master_hostname}.#{$domain}", $master_ip] 
   },
   { 
     :hostname        => "windowsnode-01",
     :ip              => '192.168.100.11',
     :box             => 'opentable/win-2012r2-standard-amd64-nocm',
-    :shell_script    => $install_puppet_node_windows, 
+    :shell_script    => $install_puppet_agent_windows, 
     :shell_args      => ["#{$master_hostname}.#{$domain}", $master_ip, $peinstaller_url_windows] 
   },
 ]
