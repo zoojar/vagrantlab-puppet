@@ -2,5 +2,5 @@ cachedir: '/opt/puppetlabs/server/data/r10k'
 sources:
   main:
     remote: 'https://github.com/zoojar/pe-controlrepo.git'
-    basedir: ${::settings::confdir}/environments"
+    basedir: '/etc/puppetlabs/code/environments"
     prefix: false
