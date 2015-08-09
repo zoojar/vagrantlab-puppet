@@ -39,6 +39,9 @@ if ! [ -z "$proxy_ip_port" ]; then
   sudo rm /etc/yum/yum.conf
 fi
 
+echo "Setting up node classifier (adding puppetclassify gem)..."
+sudo puppet apply -e "include 'profile::master_classifier.pp'" -v
+
 SCRIPT
 
 
