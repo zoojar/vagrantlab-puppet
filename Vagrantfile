@@ -26,7 +26,7 @@ nodes = [
     :cpus            => 4,
     :cpuexecutioncap => 90,
     :shell_script    => $install_puppet_master_centos7, 
-    :shell_args      => [$peinstaller_url, $peanswers_url, $r10kyaml_url, "#{$master_hostname}.#{$domain}", $master_ip]  
+    :shell_args      => [$peinstaller_url, $peanswers_url, $r10kyaml_url, $master_hostname, $domain, $master_ip]  
   },
   { 
     :hostname        => "linuxnode-01",
@@ -34,14 +34,14 @@ nodes = [
     :ip              => '192.168.100.10', 
     :box             => 'puppetlabs/ubuntu-14.04-64-nocm',
     :shell_script    => $install_puppet_agent_linux, 
-    :shell_args      => ["#{$master_hostname}.#{$domain}", $master_ip] 
+    :shell_args      => [$master_ip, $master_hostname, $domain, ] 
   },
   { 
     :hostname        => "windowsnode-01",
     :ip              => '192.168.100.11',
     :box             => 'opentable/win-2012r2-standard-amd64-nocm',
     :shell_script    => $install_puppet_agent_windows, 
-    :shell_args      => ["#{$master_hostname}.#{$domain}", $master_ip, $peinstaller_url_windows] 
+    :shell_args      => [$master_ip, $master_hostname, $domain, $peinstaller_url_windows] 
   },
 ]
 
