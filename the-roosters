@@ -16,7 +16,7 @@ sudo systemctl mask firewalld ; sudo systemctl stop firewalld
 if ! [ -z "$web_proxy_ip_port" ]; then
   echo "Adding temporary proxy for yum (to allow faster master install) [$web_proxy_ip_port]..."
   sudo echo "[main]\nproxy=$web_proxy_ip_port" > /etc/yum/yum.conf
-  export https_proxy=$web_proxy_ip_port
+  export http_proxy=$web_proxy_ip_port
 fi
 
 echo "Downloading puppet from $peinstaller_url and extracting to /tmp/peinstaller..." 
@@ -29,6 +29,9 @@ curl -L $peanswers_url > /tmp/master.answers
 
 echo "Installing puppet..."
 sudo /tmp/peinstaller/puppet-enterprise-installer -a /tmp/master.answers
+
+echo "Installing git, for r10k with shellgit..."
+sudo yum install git -y
 
 echo "Configuring r10k with puppet from $r10kyaml_url: $(curl -sL $r10kyaml_url)"
 curl -L $r10kyaml_url > /etc/puppetlabs/r10k/r10k.yaml
