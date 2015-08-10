@@ -36,6 +36,7 @@ sudo r10k deploy environment -pv
 
 if ! [ -z "$proxy_ip_port" ]; then
   echo "Removing temporary proxy for yum (to allow faster master install) [$web_proxy_ip_port]..."
+  sudo unset http_proxy
   sudo rm /etc/yum/yum.conf
 fi
 
