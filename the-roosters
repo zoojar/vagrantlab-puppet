@@ -6,6 +6,7 @@ master_hostname="$4"
 master_domain="$5"
 master_ip="$6"
 web_proxy_ip_port="$7"
+autosign_these_nodes="$8"
 
 echo "Adding [$master_ip $master_hostname.$master_domain $master_hostname] to hosts file..."
 sudo echo -e "$master_ip $master_hostname.$master_domain $master_hostname\n$(cat /etc/hosts)" > /etc/hosts
@@ -42,8 +43,12 @@ if ! [ -z "$proxy_ip_port" ]; then
   sudo rm /etc/yum/yum.conf
 fi
 
-echo "Setting up node classifier (adding puppetclassify gem)..."
+echo "Setting up node classifier (after adding the puppetclassify puppet gem)..."
+sudo puppet apply -e "package{'puppetclassify':ensure=>'0.1.0',provider=>'puppet_gem'}" -v
 sudo puppet apply -e "include 'profile::master_classifier'" -v
+
+echo "Autosigning these nodes:[$autosign_these_nodes] using autosign.conf..."
+sudo echo $autosign_these_nodes > /etc/puppetlabs/puppet/autosign.conf
 
 SCRIPT
 

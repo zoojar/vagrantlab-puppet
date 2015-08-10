@@ -12,6 +12,7 @@ $peanswers_url           = "https://raw.githubusercontent.com/zoojar/vagrantlab-
 $peinstaller_url_windows = "http://192.168.0.25/puppet-agent-1.2.2-x64.msi"
 #$peinstaller_url_windows = "http://pm.puppetlabs.com/puppet-agent/2015.2.0/1.2.2/repos/windows/puppet-agent-1.2.2-x64.msi"
 $r10kyaml_url            = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/r10k.yaml"
+$autosign_these_nodes    = "\n*.home\n*.local"
 
 # Load the pe installer scripts...
 load 'the-roosters' 
@@ -26,7 +27,7 @@ nodes = [
     :cpus            => 4,
     :cpuexecutioncap => 90,
     :shell_script    => $install_puppet_master_centos7, 
-    :shell_args      => [$peinstaller_url, $peanswers_url, $r10kyaml_url, $master_hostname, $domain, $master_ip, "#{$web_proxy_ip_port}"]  
+    :shell_args      => [$peinstaller_url, $peanswers_url, $r10kyaml_url, $master_hostname, $domain, $master_ip, "#{$web_proxy_ip_port}", $autosign_these_nodes]  
   },
   { 
     :hostname        => "linuxnode-01",
