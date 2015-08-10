@@ -40,7 +40,7 @@ if ! [ -z "$proxy_ip_port" ]; then
 fi
 
 echo "Setting up node classifier (adding puppetclassify gem)..."
-sudo puppet apply -e "include 'profile::master_classifier.pp'" -v
+sudo puppet apply -e "include 'profile::master_classifier'" -v
 
 SCRIPT
 

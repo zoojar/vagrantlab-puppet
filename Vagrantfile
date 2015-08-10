@@ -1,17 +1,16 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+#
 
 $domain                  = "lab.local"
 $master_hostname         = "puppet"
 $master_ip               = "192.168.100.100"
 $localwebserver_ip       = "192.168.0.25"
 $yum_proxy_ip_port       = "192.168.0.25:3128"
-$peinstaller_url         = "http://#{$localwebserver_ip}/puppet-enterprise-2015.2.0-el-7-x86_64.tar.gz"
-#$peinstaller_url        = "https://pm.puppetlabs.com/puppet-enterprise/3.8.1/puppet-enterprise-3.8.1-ubuntu-14.04-amd64.tar.gz"
-$peanswers_url           = "http://#{$localwebserver_ip}/puppet.lab.local.answers"
-#$peanswers_url          = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/puppet.master.answers"
+$peinstaller_url         = "https://pm.puppetlabs.com/puppet-enterprise/2015.2.0/puppet-enterprise-2015.2.0-el-7-x86_64.tar.gz"
+$peanswers_url           = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/puppet.lab.local.answers"
 $peinstaller_url_windows = "http://#{$localwebserver_ip}/puppet-agent-1.2.2-x64.msi"
-#$peinstaller_url_windows = "http://pm.puppetlabs.com/puppet-enterprise/3.8.0/puppet-enterprise-3.8.0-x64.msi"
+#$peinstaller_url_windows = "http://pm.puppetlabs.com/puppet-agent/2015.2.0/1.2.2/repos/windows/puppet-agent-1.2.2-x64.msi"
 $r10kyaml_url            = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/r10k.yaml"
 
 # Load the pe installer scripts...
