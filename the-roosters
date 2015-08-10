@@ -5,7 +5,7 @@ r10kyaml_url="$3"
 master_hostname="$4"
 master_domain="$5"
 master_ip="$6"
-proxy_ip_port="$7"
+web_proxy_ip_port="$7"
 
 echo "Adding [$master_ip $master_hostname.$master_domain $master_hostname] to hosts file..."
 sudo echo -e "$master_ip $master_hostname.$master_domain $master_hostname\n$(cat /etc/hosts)" > /etc/hosts
@@ -13,13 +13,12 @@ sudo echo -e "$master_ip $master_hostname.$master_domain $master_hostname\n$(cat
 echo "Disabling firewall"
 sudo systemctl mask firewalld ; sudo systemctl stop firewalld
 
-if ! [ -z "$proxy_ip_port" ]; then
-  echo "Adding temporary proxy for yum (to allow faster master install) [$proxy_ip_port]..."
-  sudo echo "[main]\nproxy=http://$proxy_ip_port" > /etc/yum/yum.conf
+if ! [ -z "$web_proxy_ip_port" ]; then
+  echo "Adding temporary proxy for yum (to allow faster master install) [$web_proxy_ip_port]..."
+  sudo echo "[main]\nproxy=$web_proxy_ip_port" > /etc/yum/yum.conf
 fi
 
 echo "Downloading puppet from $peinstaller_url and extracting to /tmp/peinstaller..." 
-#apt-get install axel -y
 wget -q $peinstaller_url -O /tmp/peinstaller.tar.gz
 mkdir /tmp/peinstaller
 tar -xf /tmp/peinstaller.tar.gz --strip-components=1 -C /tmp/peinstaller
@@ -35,7 +34,7 @@ curl -L $r10kyaml_url > /etc/puppetlabs/r10k/r10k.yaml
 sudo r10k deploy environment -pv
 
 if ! [ -z "$proxy_ip_port" ]; then
-  echo "Removing temporary proxy for yum (to allow faster master install) [$proxy_ip_port]..."
+  echo "Removing temporary proxy for yum (to allow faster master install) [$web_proxy_ip_port]..."
   sudo rm /etc/yum/yum.conf
 fi
 
@@ -70,12 +69,13 @@ $master_ip=$Args[0]
 $master_hostname=$Args[1]
 $master_domain=$Args[2]
 $peinstaller_url_windows=$Args[3]
+$web_proxy_ip_port=$Args[4]
 
 echo "Adding [$master_ip $master_hostname.$master_domain] to hosts file..."
 add-content "C:\\Windows\\System32\\drivers\\etc\\hosts" "$master_ip $master_hostname.$master_domain"
 
 echo "Downloading puppet from $peinstaller_url_windows..."
-wget $peinstaller_url_windows -outfile "c:\\windows\\temp\\puppet-enterprise-installer.msi"
+wget $peinstaller_url_windows -outfile "c:\\windows\\temp\\puppet-enterprise-installer.msi" -Proxy $web_proxy_ip_port
 
 echo "Installing puppet..."
 Start-Process -FilePath msiexec -ArgumentList /i, "C:\\Windows\\Temp\\puppet-enterprise-installer.msi", /quiet -wait 
