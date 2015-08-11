@@ -30,7 +30,7 @@ nodes = [
     :shell_args      => [$peinstaller_url, $peanswers_url, $r10kyaml_url, $master_hostname, $domain, $master_ip, "#{$web_proxy_ip_port}", $autosign_these_nodes]  
   },
   { 
-    :hostname        => "test-web-linuxnode-01",
+    :hostname        => "test-web-01",
     :domain          => $domain,
     :ip              => '192.168.100.10', 
     :box             => 'puppetlabs/centos-7.0-64-nocm', 
