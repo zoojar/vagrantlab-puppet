@@ -43,6 +43,9 @@ if ! [ -z "$proxy_ip_port" ]; then
   sudo rm /etc/yum/yum.conf
 fi
 
+echo "Updating classes via classifier API..."
+curl -X POST https://$master_hostname.$master_domain:4433/classifier-api/v1/update-classes --cert /etc/puppetlabs/puppet/ssl/certs/$master_hostname.$master_domain.pem --key /etc/puppetlabs/puppet/ssl/private_keys/$master_hostname.$master_domain.pem --cacert /etc/puppetlabs/puppet/ssl/certs/ca.pem
+
 echo "Setting up node classifier (after adding the puppetclassify puppet gem)..."
 sudo puppet apply -e "package{'puppetclassify':ensure=>'0.1.0',provider=>'puppet_gem'}" -v
 sudo puppet apply -e "include 'profile::master_classifier'" -v
