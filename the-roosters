@@ -48,7 +48,7 @@ sudo puppet apply -e "package{'puppetclassify':ensure=>'0.1.0',provider=>'puppet
 sudo puppet apply -e "include 'profile::master_classifier'" -v
 
 echo "Autosigning these nodes:[$autosign_these_nodes] using autosign.conf..."
-sudo echo $autosign_these_nodes > /etc/puppetlabs/puppet/autosign.conf
+sudo printf "\n$autosign_these_nodes" >> /etc/puppetlabs/puppet/autosign.conf
 
 SCRIPT
 
@@ -60,6 +60,9 @@ master_domain="$3"
 
 echo "Adding [$master_ip $master_hostname.$master_domain $master_hostname] to hosts file..."
 sudo echo -e "$master_ip $master_hostname.$master_domain $master_hostname\n$(cat /etc/hosts)" > /etc/hosts
+
+echo "Disabling firewall"
+sudo systemctl mask firewalld ; sudo systemctl stop firewalld
 
 echo "Installing puppet from https://$master_hostname.$master_domain:8140/packages/current/install.bash..."
 curl -k https://$master_hostname.$master_domain:8140/packages/current/install.bash | sudo bash
