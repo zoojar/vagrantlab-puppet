@@ -44,14 +44,18 @@ if ! [ -z "$proxy_ip_port" ]; then
 fi
 
 echo "Updating classes via classifier API..."
-curl -X POST https://$master_hostname.$master_domain:4433/classifier-api/v1/update-classes --cert /etc/puppetlabs/puppet/ssl/certs/$master_hostname.$master_domain.pem --key /etc/puppetlabs/puppet/ssl/private_keys/$master_hostname.$master_domain.pem --cacert /etc/puppetlabs/puppet/ssl/certs/ca.pem
+sudo curl -X POST https://$master_hostname.$master_domain:4433/classifier-api/v1/update-classes --cert /etc/puppetlabs/puppet/ssl/certs/$master_hostname.$master_domain.pem --key /etc/puppetlabs/puppet/ssl/private_keys/$master_hostname.$master_domain.pem --cacert /etc/puppetlabs/puppet/ssl/certs/ca.pem -v
 
-echo "Setting up node classifier (after adding the puppetclassify puppet gem)..."
+echo "Adding the puppetclassify puppet gem..."
 sudo puppet apply -e "package{'puppetclassify':ensure=>'0.1.0',provider=>'puppet_gem'}" -v
+echo "Classifying nodes with a fork of the puppetclassify module (this will 404 on flushes but will create the groups and classify nodes...)"
 sudo puppet apply -e "include 'profile::master_classifier'" -v
 
 echo "Autosigning these nodes:[$autosign_these_nodes] using autosign.conf..."
 sudo printf "\n$autosign_these_nodes" >> /etc/puppetlabs/puppet/autosign.conf
+
+echo "Disabling automatic data binding"
+sudo puppet config set data_binding_terminus none --section master
 
 SCRIPT
 
@@ -74,7 +78,7 @@ echo "Configuring puppet with master server $master_hostname.$master_domain..."
 sudo puppet config set server $master_hostname.$master_domain
 
 echo "Calling home..."
-sudo sh -c "puppet agent -t ; true" # supress non-zero exit code
+sudo sh -c "sudo puppet agent -t ; true" # supress non-zero exit code
 
 SCRIPT
 
@@ -98,8 +102,5 @@ Start-Process -FilePath msiexec -ArgumentList /i, "C:\\Windows\\Temp\\puppet-ent
 echo "Configuring puppet with master server $master_hostname.$master_domain..."
 $env:Path += ";C:\\Program Files\\Puppet Labs\\Puppet\\bin"
 puppet config set server, "$master_hostname.$master_domain"
-
-echo "Calling home..."
-start-process puppet.bat "agent -t" 
 
 SCRIPT
