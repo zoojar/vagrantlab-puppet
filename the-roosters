@@ -59,6 +59,9 @@ sudo printf "\n$autosign_these_nodes" >> /etc/puppetlabs/puppet/autosign.conf
 echo "Disabling automatic data binding"
 sudo puppet config set data_binding_terminus none --section master
 
+echo "Adding the hiera-eyaml puppet gem..."
+sudo puppet apply -e "package{'hiera-eyaml':ensure=>'2.0.8',provider=>'puppet_gem'}" -v
+
 echo "Adding hiera eyaml private key $eyaml_private_key_url: $(curl -sL $eyaml_private_key_url)"
 curl -L $eyaml_private_key_url > /etc/puppetlabs/eyaml_private_key.pkcs7.pem
 chmod 0400 /etc/puppetlabs/eyaml_private_key.pkcs7.pem 
