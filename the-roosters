@@ -7,6 +7,8 @@ master_domain="$5"
 master_ip="$6"
 web_proxy_ip_port="$7"
 autosign_these_nodes="$8"
+eyaml_private_key_url="$9"
+eyaml_public_key_url="$10"
 
 echo "Adding [$master_ip $master_hostname.$master_domain $master_hostname] to hosts file..."
 sudo echo -e "$master_ip $master_hostname.$master_domain $master_hostname\n$(cat /etc/hosts)" > /etc/hosts
@@ -56,6 +58,14 @@ sudo printf "\n$autosign_these_nodes" >> /etc/puppetlabs/puppet/autosign.conf
 
 echo "Disabling automatic data binding"
 sudo puppet config set data_binding_terminus none --section master
+
+echo "Adding hiera eyaml private key $eyaml_private_key_url: $(curl -sL $eyaml_private_key_url)"
+curl -L $eyaml_private_key_url > /etc/puppetlabs/eyaml_private_key.pkcs7.pem
+chmod 0400 /etc/puppetlabs/eyaml_private_key.pkcs7.pem 
+
+echo "Adding hiera eyaml public key $eyaml_public_key_url: $(curl -sL $eyaml_public_key_url)"
+curl -L $eyaml_public_key_url > /etc/puppetlabs/eyaml_public_key.pkcs7.pem
+chmod 0400 /etc/puppetlabs/eyaml_public_key.pkcs7.pem
 
 SCRIPT
 

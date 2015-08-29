@@ -5,13 +5,15 @@
 $domain                  = "lab.local"
 $master_hostname         = "puppet"
 $master_ip               = "192.168.100.100"
-$web_proxy_ip_port       = "http://192.168.0.25:3128"
-$peinstaller_url         = "http://192.168.0.25/puppet-enterprise-2015.2.0-el-7-x86_64.tar.gz"
+$web_proxy_ip_port       = "http://192.168.0.5:3128"
+$peinstaller_url         = "http://192.168.0.5/puppet-enterprise-2015.2.0-el-7-x86_64.tar.gz"
 #$peinstaller_url         = "https://pm.puppetlabs.com/puppet-enterprise/2015.2.0/puppet-enterprise-2015.2.0-el-7-x86_64.tar.gz"
 $peanswers_url           = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/puppet.lab.local.answers"
-$peinstaller_url_windows = "http://192.168.0.25/puppet-agent-1.2.2-x64.msi"
+$peinstaller_url_windows = "http://192.168.0.5/puppet-agent-1.2.2-x64.msi"
 #$peinstaller_url_windows = "http://pm.puppetlabs.com/puppet-agent/2015.2.0/1.2.2/repos/windows/puppet-agent-1.2.2-x64.msi"
 $r10kyaml_url            = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/r10k.yaml"
+$eyaml_private_key_url   = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/eyaml_private_key.pkcs7.pem"
+$eyaml_public_key_url   = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/eyaml_public_key.pkcs7.pem"
 $autosign_these_nodes    = "*"
 
 # Load the pe installer scripts...
@@ -27,7 +29,7 @@ nodes = [
     :cpus            => 4,
     :cpuexecutioncap => 90,
     :shell_script    => $install_puppet_master_centos7, 
-    :shell_args      => [$peinstaller_url, $peanswers_url, $r10kyaml_url, $master_hostname, $domain, $master_ip, "#{$web_proxy_ip_port}", $autosign_these_nodes]  
+    :shell_args      => [$peinstaller_url, $peanswers_url, $r10kyaml_url, $master_hostname, $domain, $master_ip, "#{$web_proxy_ip_port}", $autosign_these_nodes, $eyaml_private_key_url, $eyaml_public_key_url]  
   },
   { 
     :hostname        => "test-web-01",
