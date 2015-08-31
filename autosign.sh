@@ -2,7 +2,7 @@
 certname=$1
 whitelist='lab.local'
 
-if [[ $certname == *"lab.local"* ]]
+if [[ $certname == *"$whitelist"* ]]
 then
   exit 0;
 else
