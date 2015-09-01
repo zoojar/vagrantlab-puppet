@@ -14,6 +14,7 @@ $peinstaller_url_windows  = "http://192.168.1.181/puppet-agent-1.2.2-x64.msi"
 $r10kyaml_url             = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/r10k.yaml"
 $eyaml_keys_url           = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/eyaml"
 $autosign_these_nodes     = "*"
+$dns_alt_names            = "puppet.lab.local,lei-compiler-01,lei-compiler-02"
 
 # Load the pe installer scripts...
 load 'the-roosters' 
@@ -31,30 +32,6 @@ nodes = [
     :shell_args      => [$peinstaller_url, $peanswers_url, $r10kyaml_url, $master_hostname, $domain, $master_ip, "#{$web_proxy_ip_port}", $autosign_these_nodes, $eyaml_keys_url]  
   },
   { 
-    :hostname        => 'lei-balancer-01', 
-    :domain          => $domain,
-    :ip              => '192.168.100.110', 
-    :box             => 'puppetlabs/centos-7.0-64-nocm', 
-    :shell_script    => $install_puppet_agent_linux, 
-    :shell_args      => [$master_ip, $master_hostname, $domain,] 
-  },
-  { 
-    :hostname        => 'lei-compiler-01', 
-    :domain          => $domain,
-    :ip              => '192.168.100.111', 
-    :box             => 'puppetlabs/centos-7.0-64-nocm', 
-    :shell_script    => $install_puppet_agent_linux, 
-    :shell_args      => [$master_ip, $master_hostname, $domain,] 
-  },
-  { 
-    :hostname        => 'lei-compiler-02', 
-    :domain          => $domain,
-    :ip              => '192.168.100.112', 
-    :box             => 'puppetlabs/centos-7.0-64-nocm', 
-    :shell_script    => $install_puppet_agent_linux, 
-    :shell_args      => [$master_ip, $master_hostname, $domain,] 
-  },
-  { 
     :hostname        => 'test-web-01',
     :domain          => $domain,
     :ip              => '192.168.100.10', 
@@ -68,6 +45,30 @@ nodes = [
     :box             => 'opentable/win-2012r2-standard-amd64-nocm',
     :shell_script    => $install_puppet_agent_windows, 
     :shell_args      => [$master_ip, $master_hostname, $domain, $peinstaller_url_windows,$web_proxy_ip_port] 
+  },
+  { 
+    :hostname        => 'lei-balancer-01', 
+    :domain          => $domain,
+    :ip              => '192.168.100.110', 
+    :box             => 'puppetlabs/centos-7.0-64-nocm', 
+    :shell_script    => $install_puppet_agent_linux, 
+    :shell_args      => [$master_ip, $master_hostname, $domain,] 
+  },
+  { 
+    :hostname        => 'lei-compiler-01', 
+    :domain          => $domain,
+    :ip              => '192.168.100.111', 
+    :box             => 'puppetlabs/centos-7.0-64-nocm', 
+    :shell_script    => $install_puppet_compiler, 
+    :shell_args      => [$master_ip, $master_hostname, $domain, $dns_alt_names] 
+  },
+  { 
+    :hostname        => 'lei-compiler-02', 
+    :domain          => $domain,
+    :ip              => '192.168.100.112', 
+    :box             => 'puppetlabs/centos-7.0-64-nocm', 
+    :shell_script    => $install_puppet_compiler, 
+    :shell_args      => [$master_ip, $master_hostname, $domain, $dns_alt_names] 
   },
 ]
 
