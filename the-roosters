@@ -73,10 +73,9 @@ echo "Classifying nodes with a fork of the puppetclassify module (this will 404 
 sudo puppet apply -e "include 'profile::master_classifier'" -v
 
 echo "Configuring policy-based autosigning..."
-sudo mkdir /etc/puppetlabs/puppet
 echo 'd41d8cd98f00b204e9800998ecf8427e' >/etc/puppetlabs/puppet/global-psk
 curl -L "${autosign_exe_url}" > /etc/puppetlabs/puppet/autosign.sh
-sudo chmod 500 /etc/puppetlabs/puppet/autosign.sh
+sudo chmod 500 /etc/puppetlabs/puppet/autosign.sh ; sudo chown pe-puppet /etc/puppetlabs/puppet/autosign.sh
 sudo puppet config set autosign /etc/puppetlabs/puppet/autosign.sh --section master
 
 echo "restarting pe-puppetserver service for new autosigning & eyaml config to take affect..."
@@ -99,7 +98,7 @@ sudo systemctl mask firewalld ; sudo systemctl stop firewalld
 
 echo "Setting up custom csr attributes for autosigning..."
 sudo mkdir -p /etc/puppetlabs/puppet
-printf "extension_requests:\n  pp_preshared_key: 'd41d8cd98f00b204e9800998ecf8427e'" >  /etc/puppetlabs/puppet/csr_attributes.yaml 
+printf "custom_attributes:\n  1.2.840.113549.1.9.7: d41d8cd98f00b204e9800998ecf8427e" >  /etc/puppetlabs/puppet/csr_attributes.yaml 
 
 echo "Installing puppet compile master from https://$master_hostname.$master_domain:8140/packages/current/install.bash..."
 curl -k https://$master_hostname.$master_domain:8140/packages/current/install.bash | sudo bash -s main:dns_alt_names=$dns_alt_names
