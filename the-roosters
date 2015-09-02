@@ -5,19 +5,19 @@ r10kyaml_url="$3"
 master_hostname="$4"
 master_domain="$5"
 master_ip="$6"
-web_proxy_ip_port="$7"
-autosign_these_nodes="$8"
-eyaml_keys_url="$9"
+master_hosts="$7"
+web_proxy_ip_port="" # http://192.168.1.181:3128"
+eyaml_keys_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/eyaml"
 hiera_yaml_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/hiera.yaml"
 autosign_exe_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/autosign.sh"
 
-echo "Adding [$master_ip $master_hostname.$master_domain $master_hostname] to hosts file..."
-sudo echo -e "$master_ip $master_hostname.$master_domain $master_hostname\n$(cat /etc/hosts)" > /etc/hosts
+echo "Adding [$master_hosts] to hosts file..."
+sudo echo -e "$master_hosts\n$(cat /etc/hosts)" > /etc/hosts
 
 echo "Disabling firewall"
 sudo systemctl mask firewalld ; sudo systemctl stop firewalld
 
-if ! [ -z "$web_proxy_ip_port" ]; then
+if ! [ "$web_proxy_ip_port" = "" ]; then
   echo "Adding temporary proxy for yum (to allow faster master install) [$web_proxy_ip_port]..."
   sudo echo "[main]\nproxy=$web_proxy_ip_port" > /etc/yum/yum.conf
   export http_proxy=$web_proxy_ip_port
@@ -59,7 +59,7 @@ echo "Configuring r10k with puppet from $r10kyaml_url: $(curl -sL $r10kyaml_url)
 curl -L $r10kyaml_url > /etc/puppetlabs/r10k/r10k.yaml
 sudo r10k deploy environment -pv
 
-if ! [ -z "$proxy_ip_port" ]; then
+if ! [ "$proxy_ip_port" = "" ]; then
   echo "Removing temporary proxy for yum (to allow faster master install) [$web_proxy_ip_port]..."
   sudo rm /etc/yum/yum.conf
 fi
@@ -84,14 +84,16 @@ sudo service pe-puppetserver restart
 SCRIPT
 
 
+
 $install_puppet_compiler = <<SCRIPT
 master_ip="$1"
 master_hostname="$2"
 master_domain="$3"
 dns_alt_names="$4"
+master_hosts="$5"
 
-echo "Adding [$master_ip $master_hostname.$master_domain $master_hostname] to hosts file..."
-sudo echo -e "$master_ip $master_hostname.$master_domain $master_hostname\n$(cat /etc/hosts)" > /etc/hosts
+echo "Adding [$master_hosts] to hosts file..."
+sudo echo -e "$master_hosts\n$(cat /etc/hosts)" > /etc/hosts
 
 echo "Disabling firewall"
 sudo systemctl mask firewalld ; sudo systemctl stop firewalld
@@ -105,7 +107,6 @@ curl -k https://$master_hostname.$master_domain:8140/packages/current/install.ba
 
 echo "Configuring puppet with master server $master_hostname.$master_domain..."
 sudo puppet config set server $master_hostname.$master_domain,
-
 
 SCRIPT
 
@@ -133,6 +134,7 @@ echo "Configuring puppet with master server $master_hostname.$master_domain..."
 sudo puppet config set server $master_hostname.$master_domain
 
 SCRIPT
+
 
 
 $install_puppet_agent_windows = <<SCRIPT
