@@ -6,7 +6,7 @@ master_hostname="$4"
 master_domain="$5"
 master_ip="$6"
 master_hosts="$7"
-web_proxy_ip_port="" # http://192.168.1.181:3128"
+web_proxy_ip_port=""
 eyaml_keys_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/eyaml"
 hiera_yaml_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/hiera.yaml"
 autosign_exe_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/autosign.sh"
@@ -46,11 +46,11 @@ sudo mkdir /etc/puppetlabs/puppet/keys
 
 echo "Adding hiera eyaml private key ${eyaml_keys_url}_private_key.pkcs7.pem: $(curl -sL ${eyaml_keys_url}_private_key.pkcs7.pem)"
 curl -L "${eyaml_keys_url}_private_key.pkcs7.pem" > /etc/puppetlabs/puppet/keys/private_key.pkcs7.pem
-chmod 0600 /etc/puppetlabs/puppet/keys/eyaml_private_key.pkcs7.pem 
+chmod 0600 /etc/puppetlabs/puppet/keys/private_key.pkcs7.pem 
 
 echo "Adding hiera eyaml public key ${eyaml_keys_url}_public_key.pkcs7.pem: $(curl -sL ${eyaml_keys_url}_public_key.pkcs7.pem)"
 curl -L "${eyaml_keys_url}_public_key.pkcs7.pem" > /etc/puppetlabs/puppet/keys/public_key.pkcs7.pem
-chmod 0644 /etc/puppetlabs/puppet/keys/eyaml_public_key.pkcs7.pem
+chmod 0644 /etc/puppetlabs/puppet/keys/public_key.pkcs7.pem
 
 echo "Installing git, for r10k with shellgit..."
 sudo yum install git -y
