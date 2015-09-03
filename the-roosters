@@ -88,8 +88,8 @@ echo "restarting pe-puppetserver service for autosigning, eyaml & rbac whitelist
 sudo service pe-puppetserver restart
 
 echo "Running background sleep to sign compilers (allowing 15 mintutes for provisioning)..."
-( sleep 600 ; sudo puppet cert --allow-dns-alt-names sign lei-compiler-01.lab.local ) &
-( sleep 600 ; sudo puppet cert --allow-dns-alt-names sign lei-compiler-02.lab.local ) &
+( sleep 900 ; sudo puppet cert --allow-dns-alt-names sign lei-compiler-01.lab.local ) &
+( sleep 900 ; sudo puppet cert --allow-dns-alt-names sign lei-compiler-02.lab.local ) &
 
 SCRIPT
 
