@@ -10,6 +10,9 @@ web_proxy_ip_port="" # http://192.168.43.181:3128"
 eyaml_keys_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/eyaml"
 hiera_yaml_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/hiera.yaml"
 autosign_exe_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/autosign.sh"
+api_cert="/etc/puppetlabs/puppet/ssl/certs/$master_hostname.$master_domain.pem"
+api_key="/etc/puppetlabs/puppet/ssl/private_keys/$master_hostname.$master_domain.pem"
+api_cacert="/etc/puppetlabs/puppet/ssl/certs/ca.pem"
 
 echo "Adding [$master_hosts] to hosts file..."
 sudo echo -e "$master_hosts\n$(cat /etc/hosts)" > /etc/hosts
@@ -65,11 +68,11 @@ if ! [ "$proxy_ip_port" = "" ]; then
 fi
 
 echo "Updating classes via classifier API..."
-sudo curl -X POST https://$master_hostname.$master_domain:4433/classifier-api/v1/update-classes --cert /etc/puppetlabs/puppet/ssl/certs/$master_hostname.$master_domain.pem --key /etc/puppetlabs/puppet/ssl/private_keys/$master_hostname.$master_domain.pem --cacert /etc/puppetlabs/puppet/ssl/certs/ca.pem -v
+sudo curl -X POST https://$master_hostname.$master_domain:4433/classifier-api/v1/update-classes --cert $api_cert --key $api_key --cacert $api_cacert -v
 
 echo "Adding the puppetclassify puppet gem..."
 sudo puppet apply -e "package{'puppetclassify':ensure=>'0.1.0',provider=>'puppet_gem'}" -v
-echo "Classifying nodes with a fork of the puppetclassify module (this will 404 on flushes but will create the groups and classify nodes...)"
+echo "Classifying nodes with module https://github.com/zoojar/prosvcs-node_manager..."
 sudo puppet apply -e "include 'profile::master_classifier'" -v
 
 echo "Configuring policy-based autosigning..."
@@ -81,7 +84,7 @@ sudo puppet config set autosign /etc/puppetlabs/puppet/autosign.sh --section mas
 echo "Adding gitserver-01.lab.local to rbac certificate whitelist for classifier management via api..."
 sudo echo -e "\ngitserver-01.lab.local" >> /etc/puppetlabs/console-services/rbac-certificate-whitelist
 
-echo "restarting pe-puppetserver service for new autosigning & eyaml config to take affect..."
+echo "restarting pe-puppetserver service for autosigning, eyaml & rbac whitelist config to take affect..."
 sudo service pe-puppetserver restart
 
 SCRIPT
