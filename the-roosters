@@ -6,7 +6,7 @@ master_hostname="$4"
 master_domain="$5"
 master_ip="$6"
 master_hosts="$7"
-web_proxy_ip_port=""
+web_proxy_ip_port="" # http://192.168.43.181:3128"
 eyaml_keys_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/eyaml"
 hiera_yaml_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/hiera.yaml"
 autosign_exe_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/autosign.sh"
@@ -19,7 +19,7 @@ sudo systemctl mask firewalld ; sudo systemctl stop firewalld
 
 if ! [ "$web_proxy_ip_port" = "" ]; then
   echo "Adding temporary proxy for yum (to allow faster master install) [$web_proxy_ip_port]..."
-  sudo echo "[main]\nproxy=$web_proxy_ip_port" > /etc/yum/yum.conf
+  sudo echo -e "[main]\nproxy=$web_proxy_ip_port" > /etc/yum/yum.conf
   export http_proxy=$web_proxy_ip_port
 fi
 
@@ -77,6 +77,9 @@ echo 'd41d8cd98f00b204e9800998ecf8427e' >/etc/puppetlabs/puppet/global-psk
 curl -L "${autosign_exe_url}" > /etc/puppetlabs/puppet/autosign.sh
 sudo chmod 500 /etc/puppetlabs/puppet/autosign.sh ; sudo chown pe-puppet /etc/puppetlabs/puppet/autosign.sh
 sudo puppet config set autosign /etc/puppetlabs/puppet/autosign.sh --section master
+
+echo "Adding gitserver-01.lab.local to rbac certificate whitelist for classifier management via api..."
+sudo echo -e "\ngitserver-01.lab.local" >> /etc/puppetlabs/console-services/rbac-certificate-whitelist
 
 echo "restarting pe-puppetserver service for new autosigning & eyaml config to take affect..."
 sudo service pe-puppetserver restart
