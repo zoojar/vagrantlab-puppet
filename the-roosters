@@ -88,6 +88,7 @@ echo "restarting pe-puppetserver service for autosigning, eyaml & rbac whitelist
 sudo service pe-puppetserver restart
 
 echo "Running background sleep to sign compilers (allowing 15 mintutes for provisioning)..."
+echo -e "#!/bin/bash \nsigned=false \nuntil signed [] "
 ( sleep 900 ; sudo puppet cert --allow-dns-alt-names sign lei-compiler-01.lab.local & ) &
 ( sleep 900 ; sudo puppet cert --allow-dns-alt-names sign lei-compiler-02.lab.local & ) &
 
@@ -158,8 +159,8 @@ echo "Adding [$master_ip $master_hostname.$master_domain] to hosts file..."
 add-content "C:\\Windows\\System32\\drivers\\etc\\hosts" "$master_ip $master_hostname.$master_domain"
 
 echo "Setting up custom csr attributes for autosigning..."
-mkdir 'C:\Program Files\Puppet Labs\Puppet\puppet\conf'
-echo "extension_requests:`n  pp_preshared_key: 'd41d8cd98f00b204e9800998ecf8427e'" >  'C:\Program Files\Puppet Labs\Puppet\puppet\conf\csr_attributes.yaml'
+mkdir 'C:\\Programdata\\Puppet Labs\\Puppet\\puppet\\conf'
+echo "custom_attributes:`r`n  1.2.840.113549.1.9.7: d41d8cd98f00b204e9800998ecf8427e" >  'C:\\Programdata\\Puppet Labs\\Puppet\\puppet\\conf\\csr_attributes.yaml'
 
 echo "Downloading puppet from $peinstaller_url_windows $web_proxy_ip_port..."
 wget $peinstaller_url_windows -outfile "c:\\windows\\temp\\puppet-enterprise-installer.msi" -Proxy $web_proxy_ip_port
