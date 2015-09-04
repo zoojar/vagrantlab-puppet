@@ -1,13 +1,13 @@
 #! /bin/bash
 csr=$(< /dev/stdin)
 certname=$1
+textformat=$(echo "$csr" | openssl req -noout -text)
+global_psk=$(cat /etc/puppetlabs/puppet/global-psk)
 
-psk=$(echo "$csr" | openssl req -noout -text | fgrep -A1 "1.2.840.113549.1.9.7" | tail -n 1 | sed -e 's/^ *//;s/ *$//')
-
-if grep -q "$psk" /etc/puppetlabs/puppet/global-psk; then
-  echo "Info: Autosigning $certname with global-psk $psk..."
+if [ "$(echo $textformat | grep -Po $global_psk)" = "$global_psk" ]; then
+  echo -e "CSR Stdin contains: $csr \n\nInfo: Autosigning $certname with global-psk $global_psk..." >> /tmp/autosign.log
   exit 0
 else
-  echo "Warn: Not Autosigning $certname with global-psk $psk - no match."
+  echo -e "CSR Stdin contains: $csr \n\nWarn: Not Autosigning $certname with global-psk $global_psk - no match." >> /tmp/autosign.log
   exit 1
 fi
