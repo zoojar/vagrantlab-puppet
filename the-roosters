@@ -119,7 +119,7 @@ sudo puppet agent -t
 
 echo "Setting up custom fact post-agent run for compiler node classification..."
 sudo echo -e "compilemaster=true" > /opt/puppetlabs/facter/facts.d/classifier.txt
-sleep 420
+sleep 600
 sudo puppet agent -t
 echo ".."
 
