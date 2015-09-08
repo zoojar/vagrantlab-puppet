@@ -84,6 +84,8 @@ sudo puppet config set autosign /etc/puppetlabs/puppet/autosign.sh --section mas
 echo "Adding gitserver-01.lab.local to rbac certificate whitelist for classifier management via api..."
 sudo echo -e "\ngitserver-01.lab.local" >> /etc/puppetlabs/console-services/rbac-certificate-whitelist
 
+sudo puppet config set runinterval 300
+
 echo "restarting pe-puppetserver service for autosigning, eyaml & rbac whitelist config to take affect..."
 sudo service pe-puppetserver restart
 
@@ -117,8 +119,9 @@ sudo puppet agent -t
 
 echo "Setting up custom fact post-agent run for compiler node classification..."
 sudo echo -e "compilemaster=true" > /opt/puppetlabs/facter/facts.d/classifier.txt
-
+sleep 420
 sudo puppet agent -t
+echo ".."
 
 SCRIPT
 
