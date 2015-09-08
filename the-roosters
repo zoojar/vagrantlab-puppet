@@ -108,10 +108,7 @@ sudo mkdir -p /etc/puppetlabs/puppet
 printf "custom_attributes:\n  1.2.840.113549.1.9.7: d41d8cd98f00b204e9800998ecf8427e" >  /etc/puppetlabs/puppet/csr_attributes.yaml 
 
 echo "Installing puppet compile master from https://$master_hostname.$master_domain:8140/packages/current/install.bash..."
-curl -k https://$master_hostname.$master_domain:8140/packages/current/install.bash | sudo bash -s main:dns_alt_names=$dns_alt_names
-
-echo "Configuring puppet with master server $master_hostname.$master_domain..."
-sudo puppet config set server $master_hostname.$master_domain,
+curl -k https://$master_hostname.$master_domain:8140/packages/current/install.bash | sudo bash
 
 SCRIPT
 

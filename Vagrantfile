@@ -19,7 +19,6 @@ $peinstaller_url_windows  = "http://192.168.0.5/puppet-agent-1.2.2-x64.msi"
 $peanswers_url            = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/puppet.lab.local.answers"
 $r10kyaml_url             = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/r10k.yaml"
 $autosign_these_nodes     = "*"
-$dns_alt_names            = "puppet.lab.local,lei-compiler-01.lab.local,lei-compiler-02.lab.local"
 $master_hosts             = "#{$master_ip} #{$master_hostname}.#{$domain} #{$master_hostname}\n#{$lei_compiler_01_ip} lei-compiler-01.#{$domain} lei-compiler-01\n#{$lei_compiler_02_ip} lei-compiler-02.#{$domain} lei-compiler-02"
 
 # Load the pe installer scripts...
