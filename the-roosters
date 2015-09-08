@@ -6,7 +6,7 @@ master_hostname="$4"
 master_domain="$5"
 master_ip="$6"
 master_hosts="$7"
-web_proxy_ip_port="" # http://192.168.43.181:3128"
+web_proxy_ip_port="" #http://192.168.0.5:3128"
 eyaml_keys_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/eyaml"
 hiera_yaml_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/hiera.yaml"
 autosign_exe_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/autosign.sh"
@@ -87,10 +87,6 @@ sudo echo -e "\ngitserver-01.lab.local" >> /etc/puppetlabs/console-services/rbac
 echo "restarting pe-puppetserver service for autosigning, eyaml & rbac whitelist config to take affect..."
 sudo service pe-puppetserver restart
 
-echo "Running background sleep to sign compilers (allowing 15 mintutes for provisioning)..."
-( sleep 900 ; sudo puppet cert --allow-dns-alt-names sign lei-compiler-01.lab.local & ) &
-( sleep 900 ; sudo puppet cert --allow-dns-alt-names sign lei-compiler-02.lab.local & ) &
-
 SCRIPT
 
 
@@ -99,8 +95,7 @@ $install_puppet_compiler = <<SCRIPT
 master_ip="$1"
 master_hostname="$2"
 master_domain="$3"
-dns_alt_names="$4"
-master_hosts="$5"
+master_hosts="$4"
 
 echo "Adding [$master_hosts] to hosts file..."
 sudo echo -e "$master_hosts\n$(cat /etc/hosts)" > /etc/hosts
