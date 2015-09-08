@@ -43,7 +43,7 @@ nodes = [
     :ip              => $lei_compiler_01_ip, 
     :box             => 'puppetlabs/centos-7.0-64-nocm', 
     :shell_script    => $install_puppet_compiler, 
-    :shell_args      => [$master_ip, $master_hostname, $domain, $dns_alt_names, $master_hosts] 
+    :shell_args      => [$master_ip, $master_hostname, $domain, $master_hosts] 
   },
   { 
     :hostname        => 'lei-compiler-02', 
