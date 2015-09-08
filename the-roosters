@@ -110,6 +110,13 @@ printf "custom_attributes:\n  1.2.840.113549.1.9.7: d41d8cd98f00b204e9800998ecf8
 echo "Installing puppet compile master from https://$master_hostname.$master_domain:8140/packages/current/install.bash..."
 curl -k https://$master_hostname.$master_domain:8140/packages/current/install.bash | sudo bash
 
+sudo puppet agent -t --waitforcert 120
+
+echo "Setting up custom fact post-agent run for compiler node classification..."
+sudo echo -e "compilemaster=true" > /opt/puppetlabs/facter/facts.d/classifier.txt
+
+sudo puppet agent -t
+
 SCRIPT
 
 

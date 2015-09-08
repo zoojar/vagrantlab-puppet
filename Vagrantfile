@@ -7,7 +7,7 @@ $master_hostname          = "puppet"
 $master_ip                = "192.168.100.100"
 $lei_compiler_01_ip       = "192.168.100.111"
 $lei_compiler_02_ip       = "192.168.100.112"
-$web_proxy_ip_port        = "" #http://192.168.0.5:3128"
+$web_proxy_ip_port        = "" #"http://192.168.0.5:3128"
 
 #$peinstaller_url         = "https://pm.puppetlabs.com/puppet-enterprise/2015.2.0/puppet-enterprise-2015.2.0-el-7-x86_64.tar.gz"
 $peinstaller_url          = "http://192.168.0.5/puppet-enterprise-2015.2.0-el-7-x86_64.tar.gz"
