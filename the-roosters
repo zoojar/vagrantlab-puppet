@@ -6,7 +6,7 @@ master_hostname="$4"
 master_domain="$5"
 master_ip="$6"
 master_hosts="$7"
-web_proxy_ip_port="" #http://192.168.0.5:3128"
+web_proxy_ip_port="" #http://192.168.43.181:3128"
 eyaml_keys_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/eyaml"
 hiera_yaml_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/hiera.yaml"
 autosign_exe_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/autosign.sh"
@@ -110,7 +110,10 @@ printf "custom_attributes:\n  1.2.840.113549.1.9.7: d41d8cd98f00b204e9800998ecf8
 echo "Installing puppet compile master from https://$master_hostname.$master_domain:8140/packages/current/install.bash..."
 curl -k https://$master_hostname.$master_domain:8140/packages/current/install.bash | sudo bash
 
-sudo puppet agent -t --waitforcert 120
+echo "Waiting for initial puppet run to complete..."
+sleep 30
+
+sudo puppet agent -t
 
 echo "Setting up custom fact post-agent run for compiler node classification..."
 sudo echo -e "compilemaster=true" > /opt/puppetlabs/facter/facts.d/classifier.txt
