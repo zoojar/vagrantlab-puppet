@@ -6,7 +6,7 @@ master_hostname="$4"
 master_domain="$5"
 master_ip="$6"
 master_hosts="$7"
-web_proxy_ip_port="" #http://192.168.43.181:3128"
+web_proxy_ip_port="" #http://192.168.0.5:3128"
 eyaml_keys_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/eyaml"
 hiera_yaml_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/hiera.yaml"
 autosign_exe_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/autosign.sh"
@@ -73,7 +73,7 @@ sudo curl -X POST https://$master_hostname.$master_domain:4433/classifier-api/v1
 echo "Adding the puppetclassify puppet gem..."
 sudo puppet apply -e "package{'puppetclassify':ensure=>'0.1.0',provider=>'puppet_gem'}" -v
 echo "Classifying nodes with module https://github.com/zoojar/prosvcs-node_manager..."
-sudo puppet apply -e "include 'profile::master_classifier'" -v
+sudo puppet apply -e 'include profile::master_classifier' -v
 
 echo "Configuring policy-based autosigning..."
 echo 'd41d8cd98f00b204e9800998ecf8427e' >/etc/puppetlabs/puppet/global-psk
@@ -84,7 +84,7 @@ sudo puppet config set autosign /etc/puppetlabs/puppet/autosign.sh --section mas
 echo "Adding gitserver-01.lab.local to rbac certificate whitelist for classifier management via api..."
 sudo echo -e "\ngitserver-01.lab.local" >> /etc/puppetlabs/console-services/rbac-certificate-whitelist
 
-sudo puppet config set runinterval 300
+sudo puppet config set runinterval 240
 
 echo "restarting pe-puppetserver service for autosigning, eyaml & rbac whitelist config to take affect..."
 sudo service pe-puppetserver restart
@@ -105,12 +105,9 @@ sudo echo -e "$master_hosts\n$(cat /etc/hosts)" > /etc/hosts
 echo "Disabling firewall"
 sudo systemctl mask firewalld ; sudo systemctl stop firewalld
 
-echo "Setting up custom csr attributes for autosigning..."
-sudo mkdir -p /etc/puppetlabs/puppet
-printf "custom_attributes:\n  1.2.840.113549.1.9.7: d41d8cd98f00b204e9800998ecf8427e" >  /etc/puppetlabs/puppet/csr_attributes.yaml 
 
 echo "Installing puppet compile master from https://$master_hostname.$master_domain:8140/packages/current/install.bash..."
-curl -k https://$master_hostname.$master_domain:8140/packages/current/install.bash | sudo bash
+curl -k https://$master_hostname.$master_domain:8140/packages/current/install.bash | sudo bash -s main:dns_alt_names=puppet.lab.local,lei-compiler-01.lab.local,lei-compiler-02.lab.local
 
 echo "Waiting for initial puppet run to complete..."
 sleep 30
@@ -119,8 +116,8 @@ sudo puppet agent -t
 
 echo "Setting up custom fact post-agent run for compiler node classification..."
 sudo echo -e "compilemaster=true" > /opt/puppetlabs/facter/facts.d/classifier.txt
-echo "Waiting for agent run on master of masters to configure compile master & rbac whitelist (10 mins)..."
-sleep 600
+echo "Waiting for agent run on master of masters to configure compile master & rbac whitelist..."
+sleep 720
 sudo puppet agent -t
 echo ".."
 

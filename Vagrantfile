@@ -7,13 +7,13 @@ $master_hostname          = "puppet"
 $master_ip                = "192.168.100.100"
 $lei_compiler_01_ip       = "192.168.100.111"
 $lei_compiler_02_ip       = "192.168.100.112"
-$web_proxy_ip_port        = "" #http://192.168.43.181:3128"
+$web_proxy_ip_port        = "" #http://192.168.0.5:3128"
 
 $peinstaller_url          = "https://pm.puppetlabs.com/puppet-enterprise/2015.2.0/puppet-enterprise-2015.2.0-el-7-x86_64.tar.gz"
-#$peinstaller_url          = "http://192.168.43.181/puppet-enterprise-2015.2.0-el-7-x86_64.tar.gz"
+#$peinstaller_url          = "http://192.168.0.5/puppet-enterprise-2015.2.0-el-7-x86_64.tar.gz"
 
 $peinstaller_url_windows  = "http://pm.puppetlabs.com/puppet-agent/2015.2.0/1.2.2/repos/windows/puppet-agent-1.2.2-x64.msi"
-#$peinstaller_url_windows  = "http://192.168.43.181/puppet-agent-1.2.2-x64.msi"
+#$peinstaller_url_windows  = "http://192.168.0.5/puppet-agent-1.2.2-x64.msi"
 
 
 $peanswers_url            = "https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/puppet.lab.local.answers"
@@ -41,6 +41,9 @@ nodes = [
     :domain          => $domain,
     :ip              => $lei_compiler_01_ip, 
     :box             => 'puppetlabs/centos-7.0-64-nocm', 
+    :ram             => 4000,
+    :cpus            => 2,
+    :cpuexecutioncap => 50,
     :shell_script    => $install_puppet_compiler, 
     :shell_args      => [$master_ip, $master_hostname, $domain, $master_hosts] 
   },
@@ -49,6 +52,9 @@ nodes = [
     :domain          => $domain,
     :ip              => $lei_compiler_02_ip, 
     :box             => 'puppetlabs/centos-7.0-64-nocm', 
+    :ram             => 4000,
+    :cpus            => 2,
+    :cpuexecutioncap => 50,
     :shell_script    => $install_puppet_compiler, 
     :shell_args      => [$master_ip, $master_hostname, $domain, $master_hosts] 
   },
@@ -72,6 +78,9 @@ nodes = [
     :hostname        => 'windowsnode-01',
     :ip              => '192.168.100.11',
     :box             => 'opentable/win-2012r2-standard-amd64-nocm',
+    :ram             => 2000,
+    :cpus            => 2,
+    :cpuexecutioncap => 50,
     :shell_script    => $install_puppet_agent_windows, 
     :shell_args      => [$master_ip, $master_hostname, $domain, $peinstaller_url_windows,$web_proxy_ip_port] 
   },
@@ -90,7 +99,7 @@ Vagrant.configure("2") do |config|
     config.vm.define node[:hostname] do |nodeconfig|
       nodeconfig.vm.box      = node[:box]
       nodeconfig.vm.hostname = node[:domain] ? "#{node[:hostname]}.#{node[:domain]}" : "#{node[:hostname]}" ;
-      memory                 = node[:ram] ? node[:ram] : 2000 ; 
+      memory                 = node[:ram] ? node[:ram] : 1000 ; 
       cpus                   = node[:cpus] ? node[:cpus] : 2 ;
       cpuexecutioncap        = node[:cpuexecutioncap] ? node[:cpuexecutioncap] : 50 ;
       nodeconfig.vm.network :private_network, ip: node[:ip]
