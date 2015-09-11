@@ -6,7 +6,7 @@ master_hostname="$4"
 master_domain="$5"
 master_ip="$6"
 master_hosts="$7"
-web_proxy_ip_port="" http://192.168.0.5:3128"
+web_proxy_ip_port="" #http://192.168.0.5:3128"
 eyaml_keys_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/eyaml"
 mom_key_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/mom-key.pem"
 hiera_yaml_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/hiera.yaml"
@@ -84,8 +84,6 @@ sudo puppet config set autosign /etc/puppetlabs/puppet/autosign.sh --section mas
 
 echo "Adding gitserver-01.lab.local to rbac certificate whitelist for classifier management via api..."
 sudo echo -e "\ngitserver-01.lab.local" >> /etc/puppetlabs/console-services/rbac-certificate-whitelist
-
-sudo puppet config set runinterval 240
 
 echo "restarting pe-puppetserver service for autosigning, eyaml & rbac whitelist config to take affect..."
 sudo service pe-puppetserver restart
