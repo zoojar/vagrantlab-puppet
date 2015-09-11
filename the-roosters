@@ -6,8 +6,9 @@ master_hostname="$4"
 master_domain="$5"
 master_ip="$6"
 master_hosts="$7"
-web_proxy_ip_port="" #http://192.168.0.5:3128"
+web_proxy_ip_port="" http://192.168.0.5:3128"
 eyaml_keys_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/eyaml"
+mom_key_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/mom-key.pem"
 hiera_yaml_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/hiera.yaml"
 autosign_exe_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/autosign.sh"
 api_cert="/etc/puppetlabs/puppet/ssl/certs/$master_hostname.$master_domain.pem"
@@ -98,6 +99,9 @@ master_ip="$1"
 master_hostname="$2"
 master_domain="$3"
 master_hosts="$4"
+mom_key_path="/etc/puppetlabs/puppet/keys/mom_key.pem"
+master="$master_hostname.$master_domain"
+myhostname=$(hostname)
 
 echo "Adding [$master_hosts] to hosts file..."
 sudo echo -e "$master_hosts\n$(cat /etc/hosts)" > /etc/hosts
@@ -105,21 +109,27 @@ sudo echo -e "$master_hosts\n$(cat /etc/hosts)" > /etc/hosts
 echo "Disabling firewall"
 sudo systemctl mask firewalld ; sudo systemctl stop firewalld
 
+echo "Adding private key $mom_key_url..."
+curl -L $mom_key_url > $mom_key_path
+chmod 0600 $mom_key_path
 
 echo "Installing puppet compile master from https://$master_hostname.$master_domain:8140/packages/current/install.bash..."
 curl -k https://$master_hostname.$master_domain:8140/packages/current/install.bash | sudo bash -s main:dns_alt_names=puppet.lab.local,lei-compiler-01.lab.local,lei-compiler-02.lab.local
 
-echo "Waiting for initial puppet run to complete..."
-sleep 30
+echo "signing this compile master...""
+ssh -i $mom_key_path root@$master "sudo puppet cert --allow-dns-alt-names sign $(hostname)"
 
 sudo puppet agent -t
 
 echo "Setting up custom fact post-agent run for compiler node classification..."
 sudo echo -e "compilemaster=true" > /opt/puppetlabs/facter/facts.d/classifier.txt
-echo "Waiting for agent run on master of masters to configure compile master & rbac whitelist..."
-sleep 720
+
 sudo puppet agent -t
-echo ".."
+
+echo "Invoking puppet run on the master to force classification of this node...""
+ssh -i $mom_key_path root@$master "sudo puppet agent -t"
+
+echo "Done."
 
 SCRIPT
 

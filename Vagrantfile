@@ -59,6 +59,14 @@ nodes = [
     :shell_args      => [$master_ip, $master_hostname, $domain, $master_hosts] 
   },
   { 
+    :hostname        => 'lei-balancer-01', 
+    :domain          => $domain,
+    :ip              => '192.168.100.110', 
+    :box             => 'puppetlabs/centos-7.0-64-nocm', 
+    :shell_script    => $install_puppet_agent_linux, 
+    :shell_args      => [$master_ip, $master_hostname, $domain,] 
+  },
+  { 
     :hostname        => 'gitserver-01',
     :domain          => $domain,
     :ip              => '192.168.100.21', 
@@ -85,9 +93,9 @@ nodes = [
     :shell_args      => [$master_ip, $master_hostname, $domain, $peinstaller_url_windows,$web_proxy_ip_port] 
   },
   { 
-    :hostname        => 'lei-balancer-01', 
+    :hostname        => 'prod-web-01',
     :domain          => $domain,
-    :ip              => '192.168.100.110', 
+    :ip              => '192.168.100.12', 
     :box             => 'puppetlabs/centos-7.0-64-nocm', 
     :shell_script    => $install_puppet_agent_linux, 
     :shell_args      => [$master_ip, $master_hostname, $domain,] 
