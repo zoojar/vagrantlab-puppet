@@ -6,9 +6,8 @@ master_hostname="$4"
 master_domain="$5"
 master_ip="$6"
 master_hosts="$7"
-web_proxy_ip_port="" #http://192.168.0.5:3128"
+web_proxy_ip_port="" # http://192.168.0.5:3128"
 eyaml_keys_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/eyaml"
-mom_key_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/mom-key.pem"
 hiera_yaml_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/hiera.yaml"
 autosign_exe_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/autosign.sh"
 api_cert="/etc/puppetlabs/puppet/ssl/certs/$master_hostname.$master_domain.pem"
@@ -88,6 +87,12 @@ sudo echo -e "\ngitserver-01.lab.local" >> /etc/puppetlabs/console-services/rbac
 echo "restarting pe-puppetserver service for autosigning, eyaml & rbac whitelist config to take affect..."
 sudo service pe-puppetserver restart
 
+sudo puppet agent -t
+
+sudo puppet agent -t
+
+echo "done."
+
 SCRIPT
 
 
@@ -97,7 +102,8 @@ master_ip="$1"
 master_hostname="$2"
 master_domain="$3"
 master_hosts="$4"
-mom_key_path="/etc/puppetlabs/puppet/keys/mom_key.pem"
+mom_key_path="/tmp/mom_key.pem"
+mom_key_url="https://raw.githubusercontent.com/zoojar/vagrantlab-puppet/master/mom-key.pem"
 master="$master_hostname.$master_domain"
 myhostname=$(hostname)
 
@@ -111,21 +117,47 @@ echo "Adding private key $mom_key_url..."
 curl -L $mom_key_url > $mom_key_path
 chmod 0600 $mom_key_path
 
-echo "Installing puppet compile master from https://$master_hostname.$master_domain:8140/packages/current/install.bash..."
+echo "Stopping MOM's Agent..."
+sudo echo -e "sudo service puppet stop" > /tmp/mom-agent-stop.sh
+sudo ssh -o StrictHostKeyChecking=no -i $mom_key_path root@puppet.lab.local "bash -s" -- < /tmp/mom-agent-stop.sh
+
+echo "2.1 Installing puppet compile master from https://$master_hostname.$master_domain:8140/packages/current/install.bash..."
 curl -k https://$master_hostname.$master_domain:8140/packages/current/install.bash | sudo bash -s main:dns_alt_names=puppet.lab.local,lei-compiler-01.lab.local,lei-compiler-02.lab.local
 
-echo "signing this compile master...""
-ssh -i $mom_key_path root@$master "sudo puppet cert --allow-dns-alt-names sign $(hostname)"
-
 sudo puppet agent -t
+
+echo "Waiting for cert request on master..."
+sleep 10
+
+echo "2.2 signing this compile master..."
+sudo echo -e "sudo puppet cert --allow-dns-alt-names sign $(hostname)" > /tmp/sign_me.sh
+sudo ssh -o StrictHostKeyChecking=no -i $mom_key_path root@puppet.lab.local "bash -s" -- < /tmp/sign_me.sh
+
+echo "2.3 Running puppet on this node..."
+sudo puppet agent -t
+
+echo "2.4 Setting up custom fact post-agent run for compiler node classification..."
+sudo echo -e "compile_master_staged=true" > /opt/puppetlabs/facter/facts.d/multimaster_rules.txt
+
+echo "4.1 Running puppet on this node..."
+sudo puppet agent -t
+
+echo "Starting MOM's Agent..."
+sudo echo -e "sudo service puppet start" > /tmp/mom-agent-start.sh
+sudo ssh -o StrictHostKeyChecking=no -i $mom_key_path root@puppet.lab.local "bash -s" -- < /tmp/mom-agent-start.sh
+
+echo "Waiting for puppetdb & console restart..."
+sleep 240
 
 echo "Setting up custom fact post-agent run for compiler node classification..."
-sudo echo -e "compilemaster=true" > /opt/puppetlabs/facter/facts.d/classifier.txt
-
+sudo echo -e "\ncompile_master_classified=true" >> /opt/puppetlabs/facter/facts.d/multimaster_rules.txt
 sudo puppet agent -t
 
-echo "Invoking puppet run on the master to force classification of this node...""
-ssh -i $mom_key_path root@$master "sudo puppet agent -t"
+echo "Running r10k via webhook..."
+curl -d '{\"ref\": \"refs/heads/production\" }\' -H \"Accept: applicaton/json\" \'http://peadmin:peadmin@puppet.lab.local:8088/payload\' -k -q
+
+echo "Last agent run..."
+sudo puppet agent -t
 
 echo "Done."
 
