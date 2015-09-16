@@ -75,6 +75,14 @@ nodes = [
     :shell_args      => [$master_ip, $master_hostname, $domain] 
   },
   { 
+    :hostname        => 'lei-amqhub-01',
+    :domain          => $domain,
+    :ip              => '192.168.100.120', 
+    :box             => 'puppetlabs/centos-7.0-64-nocm', 
+    :shell_script    => $install_puppet_agent_linux, 
+    :shell_args      => [$master_ip, $master_hostname, $domain,] 
+  },
+  { 
     :hostname        => 'test-web-01',
     :domain          => $domain,
     :ip              => '192.168.100.10', 
